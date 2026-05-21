@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema de Produtos</title>
+
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>Cadastro de Produtos</h1>
+
+    <input type="text" id="codigo" placeholder="Código do Produto">
+
+    <input type="text" id="nome" placeholder="Nome do Produto">
+
+    <input type="text" id="solicitante" placeholder="Solicitante">
+
+    <button onclick="salvarProduto()">
+      Salvar Produto
+    </button>
+
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-icon icon-blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-value" id="totalProdutos">0</div>
+          <div class="card-title">Total de Produtos</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-value" id="totalSolicitantes">0</div>
+          <div class="card-title">Solicitantes</div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <h2>Produtos Cadastrados</h2>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Solicitante</th>
+          <th>Mês</th>
+        </tr>
+      </thead>
+
+      <tbody id="tabelaProdutos"></tbody>
+
+    </table>
+
+    <hr>
+
+    <h2>Relatórios</h2>
+
+    <div class="relatorio-container">
+      <div class="chart-box">
+        <h3>Cadastros por Mês</h3>
+        <canvas id="chartMes"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Cadastros por Solicitante</h3>
+        <canvas id="chartSolicitante"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="app.js"></script>
+
+</body>
+</html>
