@@ -6,6 +6,80 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+async function importarExcel() {
+  const fileInput = document.getElementById("excelFile");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Por favor, selecione um arquivo Excel.");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
+
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length === 0) {
+        alert("O arquivo Excel está vazio.");
+        return;
+      }
+
+      let importados = 0;
+      let erros = 0;
+
+      const dataAtual = new Date();
+      const mes = dataAtual.toLocaleString("pt-BR", { month: "long" });
+
+      for (const row of jsonData) {
+        try {
+          const codigo = row["Código"] || row["codigo"] || row["CODIGO"] || "";
+          const nome = row["Nome"] || row["nome"] || row["NOME"] || "";
+          const solicitante = row["Solicitante"] || row["solicitante"] || row["SOLICITANTE"] || "";
+
+          if (!codigo || !nome || !solicitante) {
+            erros++;
+            continue;
+          }
+
+          await addDoc(collection(db, "produtos"), {
+            codigo,
+            nome,
+            solicitante,
+            mes,
+            dataCadastro: dataAtual
+          });
+
+          importados++;
+        } catch (error) {
+          console.error("Erro ao importar linha:", error);
+          erros++;
+        }
+      }
+
+      alert(`Importação concluída!\n\nImportados: ${importados}\nErros: ${erros}`);
+
+      fileInput.value = "";
+      listarProdutos();
+
+    } catch (error) {
+      console.error("Erro ao ler arquivo Excel:", error);
+      alert("Erro ao ler arquivo Excel. Verifique se o formato está correto.");
+    }
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+window.importarExcel = importarExcel;
+
 async function salvarProduto() {
 
   const codigo = document.getElementById("codigo").value;
