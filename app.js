@@ -80,6 +80,46 @@ async function importarExcel() {
 
 window.importarExcel = importarExcel;
 
+async function exportarExcel() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "produtos"));
+
+    const dadosExport = [];
+
+    querySnapshot.forEach((doc) => {
+      const produto = doc.data();
+      dadosExport.push({
+        "Código": produto.codigo,
+        "Nome": produto.nome,
+        "Solicitante": produto.solicitante
+      });
+    });
+
+    if (dadosExport.length === 0) {
+      alert("Não há produtos cadastrados para exportar.");
+      return;
+    }
+
+    const ws = XLSX.utils.json_to_sheet(dadosExport);
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+
+    const dataAtual = new Date();
+    const nomeArquivo = `produtos_${dataAtual.getDate()}_${dataAtual.getMonth() + 1}_${dataAtual.getFullYear()}.xlsx`;
+
+    XLSX.writeFile(wb, nomeArquivo);
+
+    alert(`Planilha exportada com sucesso! ${dadosExport.length} produtos exportados.`);
+
+  } catch (error) {
+    console.error("Erro ao exportar Excel:", error);
+    alert("Erro ao exportar planilha. Tente novamente.");
+  }
+}
+
+window.exportarExcel = exportarExcel;
+
 async function salvarProduto() {
 
   const codigo = document.getElementById("codigo").value;

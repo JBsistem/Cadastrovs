@@ -25,12 +25,15 @@
     </button>
 
     <div class="import-section">
-      <h3>Importar do Excel</h3>
+      <h3>Importar/Exportar Excel</h3>
       <p class="import-info">Selecione um arquivo Excel (.xlsx ou .xls) com as colunas: Código, Nome, Solicitante</p>
       <div class="import-controls">
         <input type="file" id="excelFile" accept=".xlsx,.xls" class="file-input">
         <button onclick="importarExcel()" class="import-button">
           Importar Planilha
+        </button>
+        <button onclick="exportarExcel()" class="export-button">
+          Exportar Planilha
         </button>
       </div>
     </div>
