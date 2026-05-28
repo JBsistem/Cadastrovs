@@ -6,6 +6,8 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+let todosProdutos = [];
+
 async function importarExcel() {
   const fileInput = document.getElementById("excelFile");
   const file = fileInput.files[0];
@@ -82,21 +84,25 @@ window.importarExcel = importarExcel;
 
 async function exportarExcel() {
   try {
+    const mesSelecionado = document.getElementById("mesExportar").value;
     const querySnapshot = await getDocs(collection(db, "produtos"));
 
     const dadosExport = [];
 
     querySnapshot.forEach((doc) => {
       const produto = doc.data();
-      dadosExport.push({
-        "Código": produto.codigo,
-        "Nome": produto.nome,
-        "Solicitante": produto.solicitante
-      });
+
+      if (!mesSelecionado || produto.mes === mesSelecionado) {
+        dadosExport.push({
+          "Código": produto.codigo,
+          "Nome": produto.nome,
+          "Solicitante": produto.solicitante
+        });
+      }
     });
 
     if (dadosExport.length === 0) {
-      alert("Não há produtos cadastrados para exportar.");
+      alert("Não há produtos cadastrados para exportar com o filtro selecionado.");
       return;
     }
 
@@ -106,7 +112,7 @@ async function exportarExcel() {
     XLSX.utils.book_append_sheet(wb, ws, "Produtos");
 
     const dataAtual = new Date();
-    const nomeArquivo = `produtos_${dataAtual.getDate()}_${dataAtual.getMonth() + 1}_${dataAtual.getFullYear()}.xlsx`;
+    const nomeArquivo = `produtos_${mesSelecionado ? mesSelecionado + '_' : ''}${dataAtual.getDate()}_${dataAtual.getMonth() + 1}_${dataAtual.getFullYear()}.xlsx`;
 
     XLSX.writeFile(wb, nomeArquivo);
 
@@ -165,9 +171,17 @@ async function listarProdutos() {
   let totalProdutos = 0;
   let uniqueSolicitantes = new Set();
 
+  todosProdutos = [];
+
+  const mesesDisponiveis = new Set();
+
   querySnapshot.forEach((doc) => {
 
     const produto = doc.data();
+    produto.id = doc.id;
+
+    todosProdutos.push(produto);
+    mesesDisponiveis.add(produto.mes);
 
     tabela.innerHTML += `
 
@@ -196,6 +210,12 @@ async function listarProdutos() {
     uniqueSolicitantes.add(produto.solicitante);
   });
 
+  const mesSelect = document.getElementById("mesExportar");
+  mesSelect.innerHTML = '<option value="">Todos os meses</option>';
+  mesesDisponiveis.forEach(mes => {
+    mesSelect.innerHTML += `<option value="${mes}">${mes.charAt(0).toUpperCase() + mes.slice(1)}</option>`;
+  });
+
   document.getElementById("totalProdutos").textContent = totalProdutos;
   document.getElementById("totalSolicitantes").textContent = uniqueSolicitantes.size;
 
@@ -204,6 +224,35 @@ async function listarProdutos() {
     relatorioSolicitante
   );
 }
+
+function filtrarTabela() {
+  const filtroNome = document.getElementById("filtroNome").value.toLowerCase();
+  const filtroSolicitante = document.getElementById("filtroSolicitante").value.toLowerCase();
+  const filtroMes = document.getElementById("filtroMes").value.toLowerCase();
+  const tabela = document.getElementById("tabelaProdutos");
+  tabela.innerHTML = "";
+
+  const produtosFiltrados = todosProdutos.filter(produto => {
+    const matchNome = produto.nome.toLowerCase().includes(filtroNome);
+    const matchSolicitante = produto.solicitante.toLowerCase().includes(filtroSolicitante);
+    const matchMes = produto.mes.toLowerCase().includes(filtroMes);
+
+    return matchNome && matchSolicitante && matchMes;
+  });
+
+  produtosFiltrados.forEach(produto => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${produto.codigo}</td>
+        <td>${produto.nome}</td>
+        <td>${produto.solicitante}</td>
+        <td>${produto.mes}</td>
+      </tr>
+    `;
+  });
+}
+
+window.filtrarTabela = filtrarTabela;
 
 function mostrarRelatorios(relMes, relSolic) {
 

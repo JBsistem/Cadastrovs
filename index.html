@@ -32,6 +32,9 @@
         <button onclick="importarExcel()" class="import-button">
           Importar Planilha
         </button>
+        <select id="mesExportar" class="month-select">
+          <option value="">Todos os meses</option>
+        </select>
         <button onclick="exportarExcel()" class="export-button">
           Exportar Planilha
         </button>
@@ -86,6 +89,16 @@
     <hr>
 
     <h2>Produtos Cadastrados</h2>
+
+    <div class="filter-section">
+      <div class="filter-row">
+        <input type="text" id="filtroNome" placeholder="Filtrar por Nome..." onkeyup="filtrarTabela()">
+        <input type="text" id="filtroSolicitante" placeholder="Filtrar por Solicitante..." onkeyup="filtrarTabela()">
+      </div>
+      <div class="filter-row">
+        <input type="text" id="filtroMes" placeholder="Filtrar por Mês..." onkeyup="filtrarTabela()">
+      </div>
+    </div>
 
     <table>
 
