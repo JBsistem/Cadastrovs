@@ -221,7 +221,8 @@ async function listarProdutos() {
 
   mostrarRelatorios(
     relatorioMes,
-    relatorioSolicitante
+    relatorioSolicitante,
+    todosProdutos
   );
 }
 
@@ -254,10 +255,11 @@ function filtrarTabela() {
 
 window.filtrarTabela = filtrarTabela;
 
-function mostrarRelatorios(relMes, relSolic) {
+function mostrarRelatorios(relMes, relSolic, produtos) {
 
   const ctxMes = document.getElementById("chartMes").getContext("2d");
   const ctxSolic = document.getElementById("chartSolicitante").getContext("2d");
+  const ctxSolicMes = document.getElementById("chartSolicitanteMes").getContext("2d");
 
   const meses = Object.keys(relMes);
   const valoresMes = Object.values(relMes);
@@ -271,6 +273,10 @@ function mostrarRelatorios(relMes, relSolic) {
 
   if (window.chartSolicInstance) {
     window.chartSolicInstance.destroy();
+  }
+
+  if (window.chartSolicMesInstance) {
+    window.chartSolicMesInstance.destroy();
   }
 
   window.chartMesInstance = new Chart(ctxMes, {
@@ -424,6 +430,121 @@ function mostrarRelatorios(relMes, relSolic) {
         }
       },
       cutout: "60%"
+    }
+  });
+
+  // Process data for solicitante by month chart
+  const relatorioSolicitanteMes = {};
+  const mesesOrdenados = [...new Set(produtos.map(p => p.mes))].sort();
+  const solicitantesUnicos = [...new Set(produtos.map(p => p.solicitante))].sort();
+
+  solicitantesUnicos.forEach(solicitante => {
+    relatorioSolicitanteMes[solicitante] = {};
+    mesesOrdenados.forEach(mes => {
+      relatorioSolicitanteMes[solicitante][mes] = 0;
+    });
+  });
+
+  produtos.forEach(produto => {
+    if (relatorioSolicitanteMes[produto.solicitante] && relatorioSolicitanteMes[produto.solicitante][produto.mes] !== undefined) {
+      relatorioSolicitanteMes[produto.solicitante][produto.mes]++;
+    }
+  });
+
+  // Create datasets for the chart
+  const cores = [
+    "rgba(102, 126, 234, 0.8)",
+    "rgba(118, 75, 162, 0.8)",
+    "rgba(240, 147, 251, 0.8)",
+    "rgba(245, 87, 108, 0.8)",
+    "rgba(246, 173, 85, 0.8)",
+    "rgba(102, 126, 234, 0.8)",
+    "rgba(118, 75, 162, 0.8)",
+    "rgba(240, 147, 251, 0.8)",
+    "rgba(245, 87, 108, 0.8)",
+    "rgba(246, 173, 85, 0.8)"
+  ];
+
+  const bordas = [
+    "rgba(102, 126, 234, 1)",
+    "rgba(118, 75, 162, 1)",
+    "rgba(240, 147, 251, 1)",
+    "rgba(245, 87, 108, 1)",
+    "rgba(246, 173, 85, 1)",
+    "rgba(102, 126, 234, 1)",
+    "rgba(118, 75, 162, 1)",
+    "rgba(240, 147, 251, 1)",
+    "rgba(245, 87, 108, 1)",
+    "rgba(246, 173, 85, 1)"
+  ];
+
+  const datasets = solicitantesUnicos.map((solicitante, index) => ({
+    label: solicitante,
+    data: mesesOrdenados.map(mes => relatorioSolicitanteMes[solicitante][mes] || 0),
+    backgroundColor: cores[index % cores.length],
+    borderColor: bordas[index % bordas.length],
+    borderWidth: 2,
+    borderRadius: 4
+  }));
+
+  window.chartSolicMesInstance = new Chart(ctxSolicMes, {
+    type: "bar",
+    data: {
+      labels: mesesOrdenados,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          position: "top",
+          labels: {
+            padding: 15,
+            font: {
+              size: 11
+            },
+            usePointStyle: true,
+            pointStyle: "circle"
+          }
+        },
+        tooltip: {
+          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          padding: 12,
+          cornerRadius: 8,
+          titleFont: {
+            size: 14,
+            weight: "600"
+          },
+          bodyFont: {
+            size: 13
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,
+            font: {
+              size: 12
+            }
+          },
+          grid: {
+            color: "rgba(0, 0, 0, 0.05)"
+          }
+        },
+        x: {
+          ticks: {
+            font: {
+              size: 12
+            }
+          },
+          grid: {
+            display: false
+          }
+        }
+      }
     }
   });
 }

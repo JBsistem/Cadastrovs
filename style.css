@@ -386,3 +386,7 @@ canvas {
   max-width: 100%;
   height: auto;
 }
+
+.full-width {
+  grid-column: 1 / -1;
+}
